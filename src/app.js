@@ -2,7 +2,6 @@ var React = require('react'),
 	ReactDOM = require('react-dom'),
 	createStore = require('redux').createStore,
 	combineReducers = require('redux').combineReducers,
-	actions = require('actions'),
 	reducers = require('./reducers/index.js'),
 	Home = require('views/Home'),
 	store = createStore(reducers)

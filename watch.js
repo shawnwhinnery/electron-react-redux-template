@@ -7,6 +7,13 @@ var fs = require('fs'),
 	babel = require("babel-core"),
 	webpack = require("webpack"),
 
+	colors = require('colors'),
+	concat = require('concat-files'),
+	copyFile = require('./lib/copyFile/index.js'),
+	run = require('./lib/run'),
+	Job = require('./lib/job'),
+	glob = require('glob'),
+
 	webpackConfig = {
 		context: __dirname + "/src",
 		entry: "./app.js",
@@ -37,12 +44,6 @@ var fs = require('fs'),
 		filename: 'style.less', // Specify a filename, for better error messages
 		compress: true          // Minify CSS output
 	},
-	colors = require('colors'),
-	concat = require('concat-files'),
-	copyFile = require('./lib/copyFile/index.js'),
-	run = require('./lib/run'),
-	Job = require('./lib/job'),
-	glob = require('glob'),
 	lessFiles = [],
 	jsFiles = [],
 	buildingLess = false,
@@ -81,7 +82,7 @@ var fs = require('fs'),
 					function (e, output) {
 						fs.writeFile('./build/style.css', output.css, function(){
 							console.log('./build/style.css'.green, 'written')
-							resolve()
+							if (resolve) resolve()
 						})
 					});
 			})
@@ -93,10 +94,9 @@ var fs = require('fs'),
 				var result = babel.transform(file.toString(), {})
 				fs.writeFile('./build/app.js', result.code, function(err, file){
 					console.log('./build/app.js'.green, 'written')
-					resolve()
+					if (resolve) resolve()
 				})
 			})
-			resolve()
 		});
 	},
 	copyStaticAssets = function(resolve){
@@ -116,14 +116,14 @@ var fs = require('fs'),
 	}
 
 
-// (function(){
-//
 new Job([
 	globPromise('./src/components/**/styles/*.less'),
 	globPromise('./src/*.less')
 ], function(files){
 	lessFiles = _.flattenDeep(files)
 	watchFilesThen(lessFiles, buildLess)
+	buildLess()
+	copyStaticAssets(function(){})
 })
 
 new Job([
@@ -133,107 +133,6 @@ new Job([
 ], function(files){
 	jsFiles = _.flattenDeep(files)
 	watchFilesThen(jsFiles, buildJs)
+	buildJs()
+	copyStaticAssets(function(){})
 })
-
-copyStaticAssets(function(){})
-
-// })()
-
-// (function(){
-
-
-// })()
-// fs.watch('./src/app.js', {encoding: 'buffer'}, function (eventType, filename) {
-// 	console.log('js')
-// 	new Job([
-// 		buildJs,
-// 		copyStaticAssets
-// 	], function () {
-//
-// 	})
-// })
-// setTimeout(function () {
-// 	// console.log(lessFiles, jsFiles)
-//
-// 	lessFiles.map(function (file) {
-// 		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
-// 			console.log('less')
-// 			buildLess()
-// 			copyStaticAssets()
-// 		})
-// 	})
-//
-// 	jsFiles.map(function(file){
-// 		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
-// 			console.log('js')
-// 			buildJs()
-// 			copyStaticAssets()
-// 		})
-// 	})
-//
-// 	buildLess()
-// 	buildJs()
-// 	copyStaticAssets()
-//
-//
-// }, 5000)
-
-
-
-// function watchJS(error, files){
-// 	files.map(function (file) {
-//
-// 		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename)  {
-//
-// 			if(building) return console.log(eventType)
-//
-// 			building = true
-//
-// 			console.log('build started')
-//
-// 			// Create webpack bundle
-// 			// -----------------------------------------------------------------------
-// 			run('webpack . -d')
-//
-// 			// Copy static assets
-// 			// -----------------------------------------------------------------------
-// 			copyFile('./src/index.html', './build/index.html')
-//
-// 			copyFile('./src/index.js', './build/index.js')
-//
-// 			glob('./src/images/*', {}, function (err,files) {
-// 				files.map(function (file) {
-// 					copyFile(file, file.replace('/src/', '/build/'))
-// 				})
-// 			})
-//
-//
-// 			run('babel ./build/app.js --out-file ./build/app.js')
-//
-//
-// 		});
-//
-// 	})
-// }
-
-
-
-// #create webpack bundle in the build folder (app.js)
-// webpack .
-//
-// #copy static assets to the build folder
-// cp ./src/index.html ./build/index.html
-// cp ./src/index.js ./build/index.js
-// cp -r ./src/images ./build
-//
-// #concat .less files and write them to the build folder
-// cat ./src/general.less ./src/components/**/styles/*.less ./src/views/**/styles/*.less > ./build/style.less
-//
-// #compile the concatonated file
-// lessc ./build/style.less ./build/style.css
-//
-// #transpile the
-// babel ./build/app.js --out-file ./build/app.js
-//
-// ## delete the .less file
-// rm -rf ./build/style.less
