@@ -1,41 +1,103 @@
 
 var fs = require('fs'),
+	path = require('path'),
+	_ = require('lodash'),
+
+	less = require('less'),
+	babel = require("babel-core"),
+	webpack = require("webpack"),
+
+	webpackConfig = {
+		context: __dirname + "/src",
+		entry: "./app.js",
+		resolve: {
+			root: [
+				path.join(__dirname, 'node_modules'),
+				path.join(__dirname, 'src')
+			]
+		},
+		output: {
+			devtoolLineToLine: true,
+			path: __dirname + "/build",
+			filename: "app.js"
+		},
+		module: {
+			loaders: [{
+				test: /.js?$/,
+				loader: 'babel-loader',
+				exclude: /node_modules/,
+				query: {
+					presets: ['react']
+				}
+			}]
+		}
+	},
+	lessConfig = {
+		paths: ['.', './lib'],  // Specify search paths for @import directives
+		filename: 'style.less', // Specify a filename, for better error messages
+		compress: true          // Minify CSS output
+	},
+	colors = require('colors'),
 	concat = require('concat-files'),
-	copyFile = require('./src/lib/copyFile/index.js'),
-	run = require('./src/lib/run'),
-	Job = require('./src/lib/job'),
+	copyFile = require('./lib/copyFile/index.js'),
+	run = require('./lib/run'),
+	Job = require('./lib/job'),
 	glob = require('glob'),
 	lessFiles = [],
 	jsFiles = [],
 	buildingLess = false,
-	buildLess = function(){
-
-		if(buildLess) return
-
-		buildLess = true
-
-		concat(lessFiles, './build/style.less', function(err){
-			run('lessc ./build/style.less ./build/style.css')
-			buildLess = false
-		})
-
-	},
 	jsBuilding = false,
-	buildJs = function(resolve) {
+	building = {},
+	watchFilesThen = function(files, changeHandler) {
 
-		if(jsBuilding) return function () {resolve()}
+		var handlerId = 'b-'+(1 + Math.round(Math.random() * 10000000000000000))
 
-		return function () {
-			jsBuilding = true
-			new Job([
-				run('webpack . -d'),
-				run('babel ./build/app.js --out-file ./build/app.js')
-			], function(){
-				jsBuilding = false
-				resolve()
+		files.map(function(file){
+			fs.watch(file, {encoding: 'buffer'}, function (eventType, filename)  {
+
+				if(building[handlerId] === true) return console.log('rejecting build'.red, handlerId)
+				console.log('Building:', handlerId)
+				building[handlerId] = true
+
+				changeHandler(function(){
+					console.log('Building complete:', handlerId)
+					building[handlerId] = false
+				})
+
+			})
+		})
+	},
+	globPromise = function(path){
+		return function(resolve){
+			glob(path, function (err, files) {
+				resolve(files)
 			})
 		}
-
+	},
+	buildLess = function(resolve){
+		concat(lessFiles, './build/style.less', function(err){
+			fs.readFile('./build/style.less', function (err, file) {
+				less.render(file.toString(),{},
+					function (e, output) {
+						fs.writeFile('./build/style.css', output.css, function(){
+							console.log('./build/style.css'.green, 'written')
+							resolve()
+						})
+					});
+			})
+		})
+	},
+	buildJs = function(resolve) {
+		webpack(webpackConfig, function(err, stats) {
+		    fs.readFile('./build/app.js', function(err, file){
+				var result = babel.transform(file.toString(), {})
+				fs.writeFile('./build/app.js', result.code, function(err, file){
+					console.log('./build/app.js'.green, 'written')
+					resolve()
+				})
+			})
+			resolve()
+		});
 	},
 	copyStaticAssets = function(resolve){
 		return function() {
@@ -47,7 +109,7 @@ var fs = require('fs'),
 					files.map(function (file) {
 						copyFile(file, file.replace('/src/', '/build/'))
 					})
-					resolve()
+					if (resolve) resolve()
 				})
 			})
 		}
@@ -56,63 +118,65 @@ var fs = require('fs'),
 
 // (function(){
 //
-glob('./src/components/**/styles/*.less', function (err, files) {
-	lessFiles.concat(files)
+new Job([
+	globPromise('./src/components/**/styles/*.less'),
+	globPromise('./src/*.less')
+], function(files){
+	lessFiles = _.flattenDeep(files)
+	watchFilesThen(lessFiles, buildLess)
 })
 
-glob('./src/*.less', function (err, files) {
-	lessFiles.concat(files)
+new Job([
+	globPromise('./src/*.js'),
+	globPromise('./src/views/**/*.js'),
+	globPromise('./src/components/**/*.js')
+], function(files){
+	jsFiles = _.flattenDeep(files)
+	watchFilesThen(jsFiles, buildJs)
 })
 
-
+copyStaticAssets(function(){})
 
 // })()
 
 // (function(){
-glob('./src/app.js', function(err, files){
-	jsFiles.concat(files)
-})
-glob('./src/views/**/*.js', function(err, files){
-	jsFiles.concat(files)
-})
-glob('./src/components/**/*.js', function(err, files){
-	jsFiles.concat(files)
-})
+
+
 // })()
-fs.watch('./src/app.js', {encoding: 'buffer'}, function (eventType, filename) {
-	console.log('js')
-	new Job([
-		buildJs,
-		copyStaticAssets
-	], function () {
-
-	})
-})
-setTimeout(function () {
-	// console.log(lessFiles, jsFiles)
-
-	lessFiles.map(function (file) {
-		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
-			console.log('less')
-			buildLess()
-			copyStaticAssets()
-		})
-	})
-
-	jsFiles.map(function(file){
-		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
-			console.log('js')
-			buildJs()
-			copyStaticAssets()
-		})
-	})
-
-	buildLess()
-	buildJs()
-	copyStaticAssets()
-
-
-}, 5000)
+// fs.watch('./src/app.js', {encoding: 'buffer'}, function (eventType, filename) {
+// 	console.log('js')
+// 	new Job([
+// 		buildJs,
+// 		copyStaticAssets
+// 	], function () {
+//
+// 	})
+// })
+// setTimeout(function () {
+// 	// console.log(lessFiles, jsFiles)
+//
+// 	lessFiles.map(function (file) {
+// 		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
+// 			console.log('less')
+// 			buildLess()
+// 			copyStaticAssets()
+// 		})
+// 	})
+//
+// 	jsFiles.map(function(file){
+// 		fs.watch(file, {encoding: 'buffer'}, function (eventType, filename) {
+// 			console.log('js')
+// 			buildJs()
+// 			copyStaticAssets()
+// 		})
+// 	})
+//
+// 	buildLess()
+// 	buildJs()
+// 	copyStaticAssets()
+//
+//
+// }, 5000)
 
 
 
