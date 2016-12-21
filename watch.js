@@ -123,16 +123,18 @@ new Job([
 	lessFiles = _.flattenDeep(files)
 	watchFilesThen(lessFiles, buildLess)
 	buildLess()
-	copyStaticAssets(function(){})
 })
 
 new Job([
 	globPromise('./src/*.js'),
+	globPromise('./src/reducers/*.js'),
+	globPromise('./src/reducers/**/*.js'),
 	globPromise('./src/views/**/*.js'),
 	globPromise('./src/components/**/*.js')
 ], function(files){
 	jsFiles = _.flattenDeep(files)
 	watchFilesThen(jsFiles, buildJs)
 	buildJs()
-	copyStaticAssets(function(){})
 })
+
+copyStaticAssets(function(){})

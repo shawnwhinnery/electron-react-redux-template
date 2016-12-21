@@ -11,21 +11,16 @@ var React = require('react'),
 	Render the app
 */
 function render () {
-	var props = {model: store.getState().present, store: store, dispatch: dispatch}
+	var props = {store: store}
 	ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
 }
-
-
 
 class App extends React.Component {
 
 	render() {
-		return (
-			<div>
-				<Home {...this.props}/>
-			</div>
-		)
+		return (<Home {...this.props}/>)
 	}
+
 }
 
 window.APP = {
