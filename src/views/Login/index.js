@@ -3,14 +3,14 @@ var React = require('react'),
 	classname = require('classname')
 
 /**
- *	@class Home
+ *	@class Login
  */
-class Home extends React.Component {
+class Login extends React.Component {
 
-	goLogin () {
+	goHome () {
 		this.props.store.dispatch({
 			type: 'NAVIGATE',
-			view: 'login'
+			view: 'home'
 		})
 	}
 
@@ -28,22 +28,19 @@ class Home extends React.Component {
 
 /**
  *	@method render
- *	@memberof Home
+ *	@memberof Login
  */
 	render() {
-
 		var className = {
-			Home:	true
+			Login:	true
 		}
-
 		return (
 			<div className={classname(classname)}>
-				<button onClick={this.goLogin.bind(this)}>go login</button>
+				<button onClick={this.goHome.bind(this)}>go home</button>
 				<button onClick={this.undo.bind(this)}>undo</button>
 				<button onClick={this.redo.bind(this)}>redo</button>
 			</div>
 		)
-
 	}
 }
-module.exports = Home
+module.exports = Login

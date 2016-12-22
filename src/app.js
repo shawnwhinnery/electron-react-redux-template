@@ -4,22 +4,46 @@ var React = require('react'),
 	combineReducers = require('redux').combineReducers,
 	reducers = require('./reducers/index.js'),
 	Home = require('views/Home'),
+	Login = require('views/Login'),
 	store = createStore(reducers)
+
+
+
+class App extends React.Component {
+
+	componentDidMount () {
+		this.props.store.subscribe(function(){
+			this.forceUpdate()
+			return true
+		}.bind(this))
+	}
+
+	render() {
+
+		var state = this.props.store.getState(),
+			views = {
+				'login': <Login {...this.props} />,
+				'home': <Home {...this.props} />
+			}
+
+		return views[state.present.navigation.view]
+
+	}
+
+}
+
 
 
 /*
 	Render the app
 */
 function render () {
-	var props = {store: store}
-	ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
-}
 
-class App extends React.Component {
-
-	render() {
-		return (<Home {...this.props}/>)
+	var props = {
+		store: store
 	}
+
+	ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
 
 }
 
