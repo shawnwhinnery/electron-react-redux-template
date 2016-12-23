@@ -1,11 +1,8 @@
 var React = require('react'),
 	ReactDOM = require('react-dom'),
-	createStore = require('redux').createStore,
-	combineReducers = require('redux').combineReducers,
-	reducers = require('./reducers/index.js'),
 	Home = require('views/Home'),
 	Login = require('views/Login'),
-	store = createStore(reducers)
+	store = require('store')
 
 
 
@@ -46,6 +43,10 @@ function render () {
 	ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
 
 }
+
+
+
+
 
 window.APP = {
 	init: function(){

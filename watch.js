@@ -78,6 +78,7 @@ var fs = require('fs'),
 	buildLess = function(resolve){
 		concat(lessFiles, './build/style.less', function(err){
 			fs.readFile('./build/style.less', function (err, file) {
+				if (err) return console.log(err)
 				less.render(file.toString(),{},
 					function (e, output) {
 						fs.writeFile('./build/style.css', output.css, function(){
@@ -87,10 +88,13 @@ var fs = require('fs'),
 					});
 			})
 		})
+		copyStaticAssets()
 	},
 	buildJs = function(resolve) {
 		webpack(webpackConfig, function(err, stats) {
+			if(err) console.log(err.red)
 		    fs.readFile('./build/app.js', function(err, file){
+				if(err) console.log(err.red)
 				var result = babel.transform(file.toString(), {})
 				fs.writeFile('./build/app.js', result.code, function(err, file){
 					console.log('./build/app.js'.green, 'written')
@@ -98,21 +102,22 @@ var fs = require('fs'),
 				})
 			})
 		});
+		copyStaticAssets()
 	},
 	copyStaticAssets = function(resolve){
-		return function() {
-			new Job([
-				copyFile('./src/index.html', './build/index.html'),
-				copyFile('./src/index.js', './build/index.js')
-			], function(){
-				glob('./src/images/*', {}, function (err,files) {
-					files.map(function (file) {
-						copyFile(file, file.replace('/src/', '/build/'))
-					})
-					if (resolve) resolve()
-				})
+		var copy = [
+			copyFile(__dirname+'/src/index.js', __dirname+'/build/index.js'),
+			copyFile(__dirname+'/src/index.html', __dirname+'/build/index.html'),
+		]
+
+		glob(__dirname+'/src/images/*', {}, function (err,files) {
+			files.map(function (file) {
+				copy.push(copyFile(file, file.replace('/src/', '/build/')))
 			})
-		}
+			new Job(copy, resolve)
+		})
+
+
 	}
 
 
@@ -120,6 +125,7 @@ new Job([
 	globPromise('./src/components/**/styles/*.less'),
 	globPromise('./src/*.less')
 ], function(files){
+	console.log(files)
 	lessFiles = _.flattenDeep(files)
 	watchFilesThen(lessFiles, buildLess)
 	buildLess()
@@ -132,6 +138,7 @@ new Job([
 	globPromise('./src/views/**/*.js'),
 	globPromise('./src/components/**/*.js')
 ], function(files){
+	console.log(files)
 	jsFiles = _.flattenDeep(files)
 	watchFilesThen(jsFiles, buildJs)
 	buildJs()
