@@ -1,29 +1,32 @@
 var React = require('react'),
 	translate = require('translate'),
-	classname = require('classname')
+	classname = require('classname'),
+	Button = require('components/Button'),
+	Input = require('components/Input')
 
 /**
  *	@class Login
  */
 class Login extends React.Component {
 
-	goHome () {
+	onChange () {
+
+	}
+
+	attemptLogin () {
+
+		this.props.store.dispatch({
+			type: 'LOGIN',
+			sumonerName: this.refs.sumonerName.value,
+			email: this.refs.email.value,
+			password: this.refs.password.value
+		})
+
 		this.props.store.dispatch({
 			type: 'NAVIGATE',
 			view: 'home'
 		})
-	}
 
-	undo () {
-		this.props.store.dispatch({
-			type: 'UNDO'
-		})
-	}
-
-	redo () {
-		this.props.store.dispatch({
-			type: 'REDO'
-		})
 	}
 
 /**
@@ -32,13 +35,40 @@ class Login extends React.Component {
  */
 	render() {
 		var className = {
-			Login:	true
-		}
+				Login:	true
+			}
 		return (
-			<div className={classname(classname)}>
-				<button onClick={this.goHome.bind(this)}>go home</button>
-				<button onClick={this.undo.bind(this)}>undo</button>
-				<button onClick={this.redo.bind(this)}>redo</button>
+			<div className={classname(className)}>
+
+				<div className="row">
+					<div className="col-1-1">
+						<Input
+							ref="sumonerName"
+							value='Diarrhea Bubbles'
+							type='text'
+							onChange={this.onChange}
+						/>
+					</div>
+					<div className="col-1-1">
+						<Input
+							ref="email"
+							value='shawnsdrive@gmail.com'
+							type='email'
+							onChange={this.onChange}
+						/>
+					</div>
+					<div className="col-1-1">
+						<Input
+							ref="password"
+							value='password'
+							type='password'
+							onChange={this.onChange}
+						/>
+					</div>
+					<div className="col-1-1">
+						<Button onClick={this.attemptLogin.bind(this)}>Login</Button>
+					</div>
+				</div>
 			</div>
 		)
 	}

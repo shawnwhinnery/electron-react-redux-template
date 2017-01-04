@@ -29,7 +29,7 @@ module.exports = function(where, componentName){
 				"			"+componentName+":	true",
 				"		}",
 				"		return (",
-				"			<div className={classname(classname)}>"+componentName+"</div>",
+				"			<div className={classname(className)}>"+componentName+"</div>",
 				"		)",
 				"	}",
 				"}",

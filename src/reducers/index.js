@@ -29,11 +29,32 @@ var appControler ={
 	},
 	NAVIGATE: function(state, action){
 		const { past = [], present, future = [] } = state
+
+		// if unauthenticated
+		var newView = (!present.auth.sumonerName) ? 'login' : action.view
+
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
 				navigation: {
-					view: action.view
+					view: newView
+				}
+			}),
+			future: []
+		}
+	},
+	LOGIN: function(state, action){
+		const { past = [], present, future = [] } = state
+		console.log(action)
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				auth: {
+					sumonerName: action.sumonerName,
+					email: action.email,
+					password: action.password,
+					isAuthenticated: true,
+					isAuthenticating: false
 				}
 			}),
 			future: []
@@ -55,7 +76,8 @@ module.exports = function (state = {
 				isAuthenticating: false,
 				isAuthenticated: false,
 				email: undefined,
-				password: undefined
+				password: undefined,
+				sumonerName: undefined
 			}
 		},
 		future: []
@@ -68,11 +90,11 @@ module.exports = function (state = {
 		newState = reducer(newState, action)
 	}
 
-	console.log(newState)
-
-	// console.log('--------------------------------')
 	// console.log(newState)
-	// console.log('--------------------------------')
+
+	console.log('--------------------------------')
+	console.log(newState)
+	console.log('--------------------------------')
 
 	return newState
 

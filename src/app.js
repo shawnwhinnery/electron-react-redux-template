@@ -2,9 +2,9 @@ var React = require('react'),
 	ReactDOM = require('react-dom'),
 	Home = require('views/Home'),
 	Login = require('views/Login'),
-	store = require('store')
-
-
+	store = require('stores/app'),
+	database = require('stores/database'),
+	api = require('api')
 
 class App extends React.Component {
 
