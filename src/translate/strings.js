@@ -5,4 +5,5 @@ module.exports = {
 	"redo": "redo",
 	"email": "email",
 	"password": "password",
+	"Layers": "Layers",
 }

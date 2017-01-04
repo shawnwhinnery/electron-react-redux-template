@@ -1,5 +1,6 @@
 var _ = require('lodash'),
-	translate = require('translate')
+	translate = require('translate'),
+	database = require('stores/database')
 
 
 var appControler ={
@@ -29,12 +30,58 @@ var appControler ={
 	},
 	NAVIGATE: function(state, action){
 		const { past = [], present, future = [] } = state
+
+		// if unauthenticated
+		var newView =  action.view
+
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
 				navigation: {
-					view: action.view
+					view: newView
 				}
+			}),
+			future: []
+		}
+	},
+	LOGIN: function(state, action){
+		const { past = [], present, future = [] } = state
+		var projects = []
+
+		database.select('users').where({email: action.email, password: action.password}).exec(function(user){
+
+			user = user.data[0]
+
+			database.select('projects').where({user: user.id}).exec(function(res){
+				projects = res.data
+			})
+
+		})
+
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				projects: projects,
+				auth: {
+					id: 1,
+					email: action.email,
+					password: action.password,
+					isAuthenticated: true,
+					isAuthenticating: false
+				}
+			}),
+			future: []
+		}
+	},
+	OPEN_PROJECT: function(state, action){
+		const { past = [], present, future = [] } = state
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				navigation: {
+					view: 'editor'
+				},
+				project: action.project
 			}),
 			future: []
 		}
@@ -55,8 +102,10 @@ module.exports = function (state = {
 				isAuthenticating: false,
 				isAuthenticated: false,
 				email: undefined,
-				password: undefined
+				password: undefined,
+				sumonerName: undefined
 			}
+			project: {}
 		},
 		future: []
 	}, action) {
@@ -68,11 +117,11 @@ module.exports = function (state = {
 		newState = reducer(newState, action)
 	}
 
-	console.log(newState)
-
-	// console.log('--------------------------------')
 	// console.log(newState)
-	// console.log('--------------------------------')
+
+	console.log('--------------------------------')
+	console.log(newState)
+	console.log('--------------------------------')
 
 	return newState
 

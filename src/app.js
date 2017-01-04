@@ -2,9 +2,10 @@ var React = require('react'),
 	ReactDOM = require('react-dom'),
 	Home = require('views/Home'),
 	Login = require('views/Login'),
-	store = require('store')
-
-
+	Editor = require('views/Editor'),
+	store = require('stores/app'),
+	database = require('stores/database'),
+	api = require('api')
 
 class App extends React.Component {
 
@@ -20,7 +21,8 @@ class App extends React.Component {
 		var state = this.props.store.getState(),
 			views = {
 				'login': <Login {...this.props} />,
-				'home': <Home {...this.props} />
+				'home': <Home {...this.props} />,
+				'editor': <Editor {...this.props} />
 			}
 
 		return views[state.present.navigation.view]
@@ -36,11 +38,19 @@ class App extends React.Component {
 */
 function render () {
 
-	var props = {
-		store: store
-	}
 
-	ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
+
+	database.select('projects').exec(function(projects){
+
+		var props = {
+			store: store,
+			projects: projects.data || []
+		}
+
+
+		ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
+	})
+
 
 }
 

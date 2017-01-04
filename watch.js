@@ -2,11 +2,9 @@
 var fs = require('fs'),
 	path = require('path'),
 	_ = require('lodash'),
-
 	less = require('less'),
 	babel = require("babel-core"),
 	webpack = require("webpack"),
-
 	colors = require('colors'),
 	concat = require('concat-files'),
 	copyFile = require('./lib/copyFile/index.js'),
@@ -20,7 +18,8 @@ var fs = require('fs'),
 		resolve: {
 			root: [
 				path.join(__dirname, 'node_modules'),
-				path.join(__dirname, 'src')
+				path.join(__dirname, 'src'),
+				path.join(__dirname, 'lib')
 			]
 		},
 		output: {
@@ -81,6 +80,7 @@ var fs = require('fs'),
 				if (err) return console.log(err)
 				less.render(file.toString(),{},
 					function (e, output) {
+						console.log(e)
 						fs.writeFile('./build/style.css', output.css, function(){
 							console.log('./build/style.css'.green, 'written')
 							if (resolve) resolve()
@@ -122,26 +122,31 @@ var fs = require('fs'),
 
 
 new Job([
-	globPromise('./src/components/**/styles/*.less'),
-	globPromise('./src/*.less')
+	globPromise('./src/**'),
+	globPromise('./lib/**'),
 ], function(files){
-	console.log(files)
-	lessFiles = _.flattenDeep(files)
-	watchFilesThen(lessFiles, buildLess)
-	buildLess()
-})
 
-new Job([
-	globPromise('./src/*.js'),
-	globPromise('./src/reducers/*.js'),
-	globPromise('./src/reducers/**/*.js'),
-	globPromise('./src/views/**/*.js'),
-	globPromise('./src/components/**/*.js')
-], function(files){
-	console.log(files)
-	jsFiles = _.flattenDeep(files)
+	files = _.flattenDeep(files)
+
+	lessFiles = files.filter(function(f){
+		console.log('--------------')
+		console.log(f)
+		return (f.indexOf('.less') !== -1)
+	})
+	console.log("WATCHING",lessFiles.length,".less".purple,"files");
+	watchFilesThen(lessFiles, buildLess)
+
+
+	jsFiles = files.filter(function(f){return (f.indexOf(".js") !== -1)})
+	console.log("WATCHING",jsFiles.length,".js".orange,"files");
+
 	watchFilesThen(jsFiles, buildJs)
+
+
+
+	buildLess()
 	buildJs()
+
 })
 
 copyStaticAssets(function(){})
