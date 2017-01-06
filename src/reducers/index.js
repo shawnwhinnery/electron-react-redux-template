@@ -81,7 +81,9 @@ var appControler ={
 				navigation: {
 					view: 'editor'
 				},
-				project: action.project
+				editor: {
+					project: action.project
+				}
 			}),
 			future: []
 		}
@@ -104,8 +106,14 @@ module.exports = function (state = {
 				email: undefined,
 				password: undefined,
 				sumonerName: undefined
+			},
+			project: {
+				grid: {
+					size: [32,32],
+					dimensions: [64,64]
+				},
+				tiles: []
 			}
-			project: {}
 		},
 		future: []
 	}, action) {

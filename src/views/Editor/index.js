@@ -1,26 +1,64 @@
 var React = require('react'),
 	translate = require('translate'),
-	classname = require('classname')
+	classname = require('classname'),
+	two = require('2d')
 
 /**
  *	@class Editor
  */
 class Editor extends React.Component {
 
+	getPresentState () {
+		return this.props.store.getState().present
+	}
+
+	getProject () {
+
+		var state = this.getPresentState(),
+			project = state.editor.project
+
+		return project
+
+	}
+
 	renderLayers () {
-		return this.props.store.getState().project.layers.map(function(layer){
-			return <div>{layer.name}</div>
+
+		var project = this.getProject()
+
+		return project.layers.map(function(layer, i){
+			return <div key={i}>{layer.name}</div>
+		})
+
+	}
+
+
+	componentDidMount () {
+
+		var project = this.getProject()
+
+		this.setState({
+			two: new two({
+				container: this.refs.canvas,
+				tiles: project.tiles,
+				grid: {
+					size: project.grid.size,
+					dimensions: project.grid.dimensions
+				},
+				tileSize: [project.tileSize, project.tileSize]
+			})
 		})
 	}
 
-/**x`
- *	@method render
- *	@memberof Editor
- */
+	/**
+	 *	@method render
+	 *	@memberof Editor
+	 */
 	render() {
+
 		var className = {
 			Editor:	true
 		}
+
 		return (
 			<div className={classname(className)}>
 
@@ -39,16 +77,9 @@ class Editor extends React.Component {
 						{this.renderLayers()}
 					</div>
 
-					<div className="col-3-4">
-						<h3>Layers</h3>
+					<div className="col-3-4" ref="canvas">
 					</div>
 
-				</div>
-
-				<div className="row">
-					<div className="col-auto-1">
-						<h3>Swatches</h3>
-					</div>
 				</div>
 
 			</div>

@@ -9,17 +9,31 @@ var React = require('react'),
  */
 class Login extends React.Component {
 
-	onChange () {
+	constructor(props) {
 
+	  super(props)
+
+	  this.state = {
+		  email: "shawnsdrive@gmail.com",
+		  password: "password"
+	  }
+
+	}
+
+	onChangeEmail (e) {
+		this.setState({email: e.target.value})
+	}
+
+	onChangePassword (e) {
+		this.setState({password: e.target.value})
 	}
 
 	attemptLogin () {
 
 		this.props.store.dispatch({
 			type: 'LOGIN',
-			sumonerName: this.refs.sumonerName.value,
-			email: this.refs.email.value,
-			password: this.refs.password.value
+			email: this.state.email,
+			password: this.state.password
 		})
 
 		this.props.store.dispatch({
@@ -43,26 +57,18 @@ class Login extends React.Component {
 				<div className="row">
 					<div className="col-1-1">
 						<Input
-							ref="sumonerName"
-							value='Diarrhea Bubbles'
-							type='text'
-							onChange={this.onChange}
-						/>
-					</div>
-					<div className="col-1-1">
-						<Input
 							ref="email"
-							value='shawnsdrive@gmail.com'
+							value={this.state.email}
 							type='email'
-							onChange={this.onChange}
+							onChange={this.onChangeEmail.bind(this)}
 						/>
 					</div>
 					<div className="col-1-1">
 						<Input
 							ref="password"
-							value='password'
+							value={this.state.password}
 							type='password'
-							onChange={this.onChange}
+							onChange={this.onChangePassword.bind(this)}
 						/>
 					</div>
 					<div className="col-1-1">
