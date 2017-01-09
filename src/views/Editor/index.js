@@ -31,7 +31,6 @@ class Editor extends React.Component {
 
 	}
 
-
 	componentDidMount () {
 
 		var project = this.getProject()
@@ -44,8 +43,18 @@ class Editor extends React.Component {
 					size: project.grid.size,
 					dimensions: project.grid.dimensions
 				},
-				tileSize: [project.tileSize, project.tileSize]
+				tileSize: [project.tileSize, project.tileSize],
+				tiles: project.tiles,
+				layers: project.layers,
+				swatches: project.swatches
 			})
+		})
+	}
+
+	onClick () {
+		this.props.store.dispatch({
+			type: 'PAINT_TILE',
+			grid: this.state.two.mouse.grid
 		})
 	}
 
@@ -62,22 +71,24 @@ class Editor extends React.Component {
 		return (
 			<div className={classname(className)}>
 
-				<div className="row flex left middle">
-
-					<button className="inline">brush</button>
-
-					<button className="inline">fill</button>
-
-				</div>
-
-				<div className="row">
+				<div className="row fill-height">
 
 					<div className="col-1-4">
 						<h3>Layers</h3>
 						{this.renderLayers()}
+						<h3>Swatches</h3>
+						{this.getProject().swatches.map(function(o,i){
+							var setSwatch = function(){
+								this.props.store.dispatch({
+									type: 'SELECT_SWATCH',
+									id: o.id
+								})
+							}.bind(this)
+							return <img src={o.imageData} key={i} onClick={setSwatch}/>
+						}.bind(this))}
 					</div>
 
-					<div className="col-3-4" ref="canvas">
+					<div className="col-3-4 canvas-container" ref="canvas" onClick={this.onClick.bind(this)}>
 					</div>
 
 				</div>

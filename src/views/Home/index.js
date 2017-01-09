@@ -16,7 +16,9 @@ class Home extends React.Component {
 	}
 
 	renderProjects () {
-		return this.props.projects.map(function(project, i){
+		var state = this.props.store.getState()
+		console.log(state)
+		return state.present.projects.map(function(project, i){
 
 			var onClick = function() {
 				database.select('projects')

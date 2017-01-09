@@ -75,6 +75,11 @@ var appControler ={
 	},
 	OPEN_PROJECT: function(state, action){
 		const { past = [], present, future = [] } = state
+
+		database.select('swatches').where({id: action.project.swatches}).exec(function(res){
+			action.project.swatches = res.data
+		})
+
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
@@ -83,6 +88,43 @@ var appControler ={
 				},
 				editor: {
 					project: action.project
+				}
+			}),
+			future: []
+		}
+	},
+	SELECT_SWATCH: function(state, action){
+		const { past = [], present, future = [] } = state
+
+		database.select('swatches').where({id: action.project.swatches}).exec(function(res){
+			action.project.swatches = res.data
+		})
+
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				editor: {
+					swatch: action.swatch
+				}
+			}),
+			future: []
+		}
+	},
+	PAINT_TILE: function(state, action){
+		const { past = [], present, future = [] } = state
+
+		var nweTiles = _.clone(present.editor.project.tiles)
+
+		//action.swatch
+		//action.grid
+
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				editor: {
+					project: {
+						tiles: newTiles
+					}
 				}
 			}),
 			future: []

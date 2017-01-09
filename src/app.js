@@ -38,20 +38,12 @@ class App extends React.Component {
 */
 function render () {
 
-
-
-	database.select('projects').exec(function(projects){
-
 		var props = {
-			store: store,
-			projects: projects.data || []
+			store: store
 		}
 
-
 		ReactDOM.render(<App {...props}/>, document.body.querySelector('.main'))
-	})
-
-
+	
 }
 
 
