@@ -96,15 +96,11 @@ var appControler ={
 	SELECT_SWATCH: function(state, action){
 		const { past = [], present, future = [] } = state
 
-		database.select('swatches').where({id: action.project.swatches}).exec(function(res){
-			action.project.swatches = res.data
-		})
-
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
 				editor: {
-					swatch: action.swatch
+					swatch: action.id
 				}
 			}),
 			future: []
@@ -113,17 +109,17 @@ var appControler ={
 	PAINT_TILE: function(state, action){
 		const { past = [], present, future = [] } = state
 
-		var nweTiles = _.clone(present.editor.project.tiles)
+		var tiles = _.clone(present.editor.project.tiles),
+			key = "["+action.layer+"]["+action.index+"]"
 
-		//action.swatch
-		//action.grid
+		_.set(tiles, key, {swatch:action.swatch})
 
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
 				editor: {
 					project: {
-						tiles: newTiles
+						tiles: tiles
 					}
 				}
 			}),

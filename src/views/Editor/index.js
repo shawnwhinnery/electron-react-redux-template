@@ -26,9 +26,31 @@ class Editor extends React.Component {
 		var project = this.getProject()
 
 		return project.layers.map(function(layer, i){
-			return <div key={i}>{layer.name}</div>
-		})
+			var onClick = function(){
+				this.props.store.dispatch({
+					type: 'SELECT_LAYER',
+					layer: i
+				})
+			}.bind(this)
 
+			return <div key={i} onClick={onClick}>{layer.name}</div>
+		}.bind(this))
+
+	}
+
+	renderSwatches () {
+
+		var project = this.getProject()
+
+		return project.swatches.map(function(o,i){
+			var setSwatch = function(){
+				this.props.store.dispatch({
+					type: 'SELECT_SWATCH',
+					id: o.id
+				})
+			}.bind(this)
+			return <img src={o.imageData} key={i} onClick={setSwatch}/>
+		}.bind(this))
 	}
 
 	componentDidMount () {
@@ -52,10 +74,18 @@ class Editor extends React.Component {
 	}
 
 	onClick () {
+
+		var presentState = this.getPresentState(),
+			swatch = _.get(presentState, 'editor.swatch'),
+			layer = _.get(presentState, 'editor.layer') || 0
+
 		this.props.store.dispatch({
 			type: 'PAINT_TILE',
-			grid: this.state.two.mouse.grid
+			index: this.state.two.gridToIndex(this.state.two.mouse.grid),
+			swatch: swatch,
+			layer: layer
 		})
+
 	}
 
 	/**
@@ -64,9 +94,10 @@ class Editor extends React.Component {
 	 */
 	render() {
 
-		var className = {
-			Editor:	true
-		}
+		var className = {Editor:true},
+			project = this.getProject()
+
+		if(this.state && this.state.two) this.state.two.tiles = project.tiles
 
 		return (
 			<div className={classname(className)}>
@@ -74,18 +105,13 @@ class Editor extends React.Component {
 				<div className="row fill-height">
 
 					<div className="col-1-4">
+
 						<h3>Layers</h3>
-						{this.renderLayers()}
+						{this.renderLayers.bind(this)()}
+
 						<h3>Swatches</h3>
-						{this.getProject().swatches.map(function(o,i){
-							var setSwatch = function(){
-								this.props.store.dispatch({
-									type: 'SELECT_SWATCH',
-									id: o.id
-								})
-							}.bind(this)
-							return <img src={o.imageData} key={i} onClick={setSwatch}/>
-						}.bind(this))}
+						{this.renderSwatches.bind(this)()}
+
 					</div>
 
 					<div className="col-3-4 canvas-container" ref="canvas" onClick={this.onClick.bind(this)}>
