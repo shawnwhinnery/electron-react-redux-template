@@ -87,7 +87,25 @@ var appControler ={
 					view: 'editor'
 				},
 				editor: {
-					project: action.project
+					project: action.project,
+					mouse: {
+						intent: 'navigate'
+					}
+				}
+			}),
+			future: []
+		}
+	},
+	SET_INTENT: function(state, action){
+		const { past = [], present, future = [] } = state
+
+		return {
+			past: [ ...past, present ],
+			present: _.merge({}, present, {
+				editor: {
+					mouse: {
+						intent: action.intent
+					}
 				}
 			}),
 			future: []
@@ -165,9 +183,9 @@ module.exports = function (state = {
 
 	// console.log(newState)
 
-	console.log('--------------------------------')
-	console.log(newState)
-	console.log('--------------------------------')
+	// console.log('--------------------------------')
+	// console.log(newState)
+	// console.log('--------------------------------')
 
 	return newState
 

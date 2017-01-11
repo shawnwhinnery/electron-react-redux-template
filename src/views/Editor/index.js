@@ -8,23 +8,26 @@ var React = require('react'),
  */
 class Editor extends React.Component {
 
-	getPresentState () {
+	getInitalState () {
+		return {
+			mouseDown: false,
+			ctrlDown: false,
+			shiftDown: false
+		}
+	}
+
+	getApplicationState () {
 		return this.props.store.getState().present
 	}
 
 	getProject () {
-
-		var state = this.getPresentState(),
-			project = state.editor.project
-
+		var applicationState = this.getApplicationState(),
+			project = applicationState.editor.project
 		return project
-
 	}
 
-	renderLayers () {
-
+	renderLayerSelector () {
 		var project = this.getProject()
-
 		return project.layers.map(function(layer, i){
 			var onClick = function(){
 				this.props.store.dispatch({
@@ -32,16 +35,12 @@ class Editor extends React.Component {
 					layer: i
 				})
 			}.bind(this)
-
 			return <div key={i} onClick={onClick}>{layer.name}</div>
 		}.bind(this))
-
 	}
 
-	renderSwatches () {
-
+	renderSwatchSelector () {
 		var project = this.getProject()
-
 		return project.swatches.map(function(o,i){
 			var setSwatch = function(){
 				this.props.store.dispatch({
@@ -54,9 +53,7 @@ class Editor extends React.Component {
 	}
 
 	componentDidMount () {
-
 		var project = this.getProject()
-
 		this.setState({
 			two: new two({
 				container: this.refs.canvas,
@@ -73,11 +70,11 @@ class Editor extends React.Component {
 		})
 	}
 
-	onClick () {
+	paint () {
 
-		var presentState = this.getPresentState(),
-			swatch = _.get(presentState, 'editor.swatch'),
-			layer = _.get(presentState, 'editor.layer') || 0
+		var applicationState = this.getApplicationState(),
+			swatch = _.get(applicationState, 'editor.swatch'),
+			layer = _.get(applicationState, 'editor.layer') || 0
 
 		this.props.store.dispatch({
 			type: 'PAINT_TILE',
@@ -88,6 +85,32 @@ class Editor extends React.Component {
 
 	}
 
+	onMouseDown () {
+		var applicationState = this.getApplicationState()
+		if(applicationState.editor.mouse.intent === 'paint') this.paint()
+
+	}
+
+	onMouseMove () {
+		var applicationState = this.getApplicationState()
+		if(applicationState.editor.mouse.intent === 'paint' && this.state.two.mouse.down) this.paint()
+	}
+
+	selectTranslateTool () {
+		this.props.store.dispatch({
+			type: 'SET_INTENT',
+			intent: 'translate'
+		})
+	}
+
+	selectPaintTool () {
+		this.props.store.dispatch({
+			type: 'SET_INTENT',
+			intent: 'paint'
+		})
+	}
+
+
 	/**
 	 *	@method render
 	 *	@memberof Editor
@@ -95,9 +118,14 @@ class Editor extends React.Component {
 	render() {
 
 		var className = {Editor:true},
-			project = this.getProject()
+			project = this.getProject(),
+			applicationState = this.getApplicationState()
 
-		if(this.state && this.state.two) this.state.two.tiles = project.tiles
+		// Sync the redux model with the two component
+		if(this.state && this.state.two) {
+			this.state.two.tiles = project.tiles
+			this.state.two.mouse.intent = applicationState.editor.mouse.intent
+		}
 
 		return (
 			<div className={classname(className)}>
@@ -106,15 +134,19 @@ class Editor extends React.Component {
 
 					<div className="col-1-4">
 
+						<h3>Tools</h3>
+						<button onClick={this.selectTranslateTool.bind(this)}>Translate</button>
+						<button onClick={this.selectPaintTool.bind(this)}>Paint</button>
+
 						<h3>Layers</h3>
-						{this.renderLayers.bind(this)()}
+						{this.renderLayerSelector.bind(this)()}
 
 						<h3>Swatches</h3>
-						{this.renderSwatches.bind(this)()}
+						{this.renderSwatchSelector.bind(this)()}
 
 					</div>
 
-					<div className="col-3-4 canvas-container" ref="canvas" onClick={this.onClick.bind(this)}>
+					<div className="col-3-4 canvas-container" ref="canvas" onClick={this.onMouseDown.bind(this)} onMouseMove={this.onMouseMove.bind(this)}>
 					</div>
 
 				</div>
