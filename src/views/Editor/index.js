@@ -53,9 +53,8 @@ class Editor extends React.Component {
 	}
 
 	componentDidMount () {
-		var project = this.getProject()
-		this.setState({
-			two: new two({
+		var project = this.getProject(),
+			T = new two({
 				container: this.refs.canvas,
 				tiles: project.tiles,
 				grid: {
@@ -67,7 +66,11 @@ class Editor extends React.Component {
 				layers: project.layers,
 				swatches: project.swatches
 			})
-		})
+
+		window.T = T
+
+		this.setState({ two: T })
+
 	}
 
 	paint () {
