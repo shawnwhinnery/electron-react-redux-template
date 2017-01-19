@@ -57,6 +57,10 @@ database.insert([
 
 })
 
+var layer1 = []
+while(layer1.length < (32*32)){
+	layer1.push({swatch: Math.round(1+(Math.random()))})
+}
 database.insert([
 	{
 		id:1,
@@ -67,14 +71,14 @@ database.insert([
 			size: [32,32],
 			dimensions: [32,32]
 		},
-		tiles: [[{swatch: 1},{swatch: 1},{swatch: 1},{swatch: 2},{swatch: 1},{swatch: 2}]],
+		tiles: [layer1],
 		swatches: [1,2],
 		layers: [
 			{name: 'layer 1', defaultSwatch: 1}
 		]
 	}
 ]).into('projects').exec(function(){
-	console.log('bootstrapped projects')
+	console.log('bootstrapped projects', layer1.length)
 })
 
 module.exports = database

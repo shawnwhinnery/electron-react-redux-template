@@ -43,6 +43,7 @@ class Editor extends React.Component {
 		var project = this.getProject()
 		return project.swatches.map(function(o,i){
 			var setSwatch = function(){
+				console.log('cat')
 				this.props.store.dispatch({
 					type: 'SELECT_SWATCH',
 					id: o.id
