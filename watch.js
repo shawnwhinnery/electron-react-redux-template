@@ -92,9 +92,20 @@ var fs = require('fs'),
 	},
 	buildJs = function(resolve) {
 		webpack(webpackConfig, function(err, stats) {
-			if(err) console.log(err.red)
+			console.log(stats)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
+			console.log(err)
 		    fs.readFile('./build/app.js', function(err, file){
-				if(err) console.log(err.red)
+				if(err) return console.log('!!!!!!!!!!!!!!', err)
 				var result = babel.transform(file.toString(), {})
 				fs.writeFile('./build/app.js', result.code, function(err, file){
 					console.log('./build/app.js'.green, 'written')

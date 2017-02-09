@@ -1,35 +1,28 @@
 var React = require('react'),
 	translate = require('translate'),
-	classname = require('classname')
+	classname = require('classname'),
+	Button = require('components/Button')
 
 /**
  *	@class Home
  */
 class Home extends React.Component {
 
-	goLogin () {
+	/**
+	 *	@method createUsers
+	 *	@memberof Home
+	 */
+	createUsers () {
 		this.props.store.dispatch({
-			type: 'NAVIGATE',
-			view: 'login'
+			type: "NAVIGATE",
+			view: 'users'
 		})
 	}
 
-	undo () {
-		this.props.store.dispatch({
-			type: 'UNDO'
-		})
-	}
-
-	redo () {
-		this.props.store.dispatch({
-			type: 'REDO'
-		})
-	}
-
-/**
- *	@method render
- *	@memberof Home
- */
+	/**
+	 *	@method render
+	 *	@memberof Home
+	 */
 	render() {
 
 		var className = {
@@ -38,9 +31,9 @@ class Home extends React.Component {
 
 		return (
 			<div className={classname(classname)}>
-				<button onClick={this.goLogin.bind(this)}>go login</button>
-				<button onClick={this.undo.bind(this)}>undo</button>
-				<button onClick={this.redo.bind(this)}>redo</button>
+				<Button onClick={this.createUsers.bind(this)}>
+					Create User
+				</Button>
 			</div>
 		)
 

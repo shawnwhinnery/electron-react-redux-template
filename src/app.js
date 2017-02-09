@@ -1,7 +1,7 @@
 var React = require('react'),
 	ReactDOM = require('react-dom'),
 	Home = require('views/Home'),
-	Login = require('views/Login'),
+	Users = require('views/Users'),
 	store = require('stores/app'),
 	database = require('stores/database'),
 	api = require('api')
@@ -19,8 +19,8 @@ class App extends React.Component {
 
 		var state = this.props.store.getState(),
 			views = {
-				'login': <Login {...this.props} />,
-				'home': <Home {...this.props} />
+				'home': <Home {...this.props} />,
+				'users': <Users {...this.props} />
 			}
 
 		return views[state.present.navigation.view]

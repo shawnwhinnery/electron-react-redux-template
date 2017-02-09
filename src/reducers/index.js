@@ -31,7 +31,7 @@ var appControler ={
 		const { past = [], present, future = [] } = state
 
 		// if unauthenticated
-		var newView = (!present.auth.sumonerName) ? 'login' : action.view
+		var newView = (action.view) ? action.view : 'home'
 
 		return {
 			past: [ ...past, present ],
@@ -45,12 +45,10 @@ var appControler ={
 	},
 	LOGIN: function(state, action){
 		const { past = [], present, future = [] } = state
-		console.log(action)
 		return {
 			past: [ ...past, present ],
 			present: _.merge({}, present, {
 				auth: {
-					sumonerName: action.sumonerName,
 					email: action.email,
 					password: action.password,
 					isAuthenticated: true,
@@ -70,7 +68,7 @@ module.exports = function (state = {
 		past: [],
 		present: {
 			navigation: {
-				view: 'login'
+				view: 'home'
 			},
 			auth: {
 				isAuthenticating: false,
@@ -93,6 +91,8 @@ module.exports = function (state = {
 	// console.log(newState)
 
 	console.log('--------------------------------')
+	console.log(action)
+	console.log('~~  ~~  ~~  ~~  ~~ ~~')
 	console.log(newState)
 	console.log('--------------------------------')
 
